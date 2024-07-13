@@ -20,7 +20,8 @@ import (
 )
 
 var (
-	proxy = ""
+	proxy            = ""
+	lenghtOfPassword = 10
 
 	inputFile  = "./tokens.txt"
 	outputFile = "./out.txt"
@@ -76,7 +77,7 @@ func thread(tokenChan chan string, wg *sync.WaitGroup) {
 			return
 		}
 
-		newPass := RandString(10)
+		newPass := RandString(lenghtOfPassword)
 		payloadMap := map[string]string{"password": pass, "new_password": newPass}
 		payloadBytes, err := json.Marshal(payloadMap)
 		if err != nil {
