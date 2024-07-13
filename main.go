@@ -10,16 +10,17 @@ import (
 	"path/filepath"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/bogdanfinn/tls-client/profiles"
+	"golang.org/x/exp/rand"
 
 	http "github.com/bogdanfinn/fhttp"
 	tls_client "github.com/bogdanfinn/tls-client"
 )
 
 var (
-	newPass = "Ab5SexyAhhP@ss"
-	proxy   = ""
+	proxy = ""
 
 	inputFile  = "./tokens.txt"
 	outputFile = "./out.txt"
@@ -75,6 +76,7 @@ func thread(tokenChan chan string, wg *sync.WaitGroup) {
 			return
 		}
 
+		newPass := RandString(10)
 		payloadMap := map[string]string{"password": pass, "new_password": newPass}
 		payloadBytes, err := json.Marshal(payloadMap)
 		if err != nil {
@@ -89,8 +91,7 @@ func thread(tokenChan chan string, wg *sync.WaitGroup) {
 		}
 
 		req.Header = http.Header{
-			`accept`: {`*/*`},
-			// `accept-encoding`:    {`gzip, deflate, br`},
+			`accept`:             {`*/*`},
 			`accept-language`:    {`en-US,en;q=0.9,en;q=0.8`},
 			`authorization`:      {token},
 			`content-length`:     {fmt.Sprint(len(payloadBytes))},
@@ -161,10 +162,19 @@ func WriteFileLine(filePath, line string) error {
 		return fmt.Errorf("failed to write to file: %w", err)
 	}
 
-	// Flush the buffer to ensure all data is written
 	if err := writer.Flush(); err != nil {
 		return fmt.Errorf("failed to flush writer: %w", err)
 	}
 
 	return nil
+}
+
+func RandString(l int) string {
+	const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789"
+	seededRand := rand.New(rand.NewSource(uint64(time.Now().UnixNano())))
+	b := make([]byte, l)
+	for i := range b {
+		b[i] = charset[seededRand.Intn(len(charset))]
+	}
+	return string(b)
 }
