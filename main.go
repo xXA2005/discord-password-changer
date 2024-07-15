@@ -38,7 +38,7 @@ func main() {
 	tokenChan := make(chan string)
 
 	var wg sync.WaitGroup
-	for range 10 {
+	for i := 0; i < 10; i++ { 
 		wg.Add(1)
 		go thread(tokenChan, &wg)
 	}
