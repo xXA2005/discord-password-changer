@@ -119,8 +119,19 @@ func thread(tokenChan chan string, wg *sync.WaitGroup) {
 			fmt.Println(err)
 			continue
 		}
+		var fr struct {
+			Token string `json:"token"`
+		}
+
+		err = json.NewDecoder(resp.Body).Decode(&fr)
+		if err != nil {
+			fmt.Println(err)
+			continue
+		}
+		
 		fmt.Println(token[:30]+"...: ", resp.Status)
-		text := fmt.Sprintf("%s:%s:%s", email, newPass, token)
+
+		text := fmt.Sprintf("%s:%s:%s", email, newPass, fr.Token)
 		err = WriteFileLine(outputFile, text)
 		if err != nil {
 			fmt.Println("failed to save token", text, err)
